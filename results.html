@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineAI - Recommendation Results</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <i class="fa-solid fa-compact-disc logo-icon"></i>
+            <div>
+                <h1>CINEAI</h1>
+                <div class="subtitle">Movie Recommendation System</div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div style="max-width: 1000px; margin: 0 auto; width: 100%;">
+            <a href="/" class="btn-secondary" style="display: inline-flex; width: auto; margin-bottom: 1.5rem;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </a>
+
+            <div class="results-container">
+                <div class="results-header">
+                    <div class="results-title-info">
+                        <h2>Top {{ movies|length }} {{ language }} {{ genre }} Movies</h2>
+                        <p>Generated via demographic ranking filters.</p>
+                    </div>
+                </div>
+
+                {% if message or not movies %}
+                <div class="empty-state">
+                    <i class="fa-solid fa-circle-exclamation" style="background: none; -webkit-text-fill-color: initial; color: var(--text-muted);"></i>
+                    <h3>No Matching Movies Found</h3>
+                    <p>{{ message or "Please try a different language or genre combination." }}</p>
+                </div>
+                {% else %}
+                <div class="movie-grid">
+                    {% for movie in movies %}
+                    <div class="movie-card">
+                        <div class="movie-poster-wrapper">
+                            {% if movie.poster_path and movie.poster_path != 'nan' and movie.poster_path != '' %}
+                            <img class="movie-poster" src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=&quot;poster-placeholder&quot;><i class=&quot;fa-solid fa-film&quot;></i><span>{{ movie.title }}</span></div>'">
+                            {% else %}
+                            <div class="poster-placeholder">
+                                <i class="fa-solid fa-film"></i>
+                                <span>{{ movie.title }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="movie-details">
+                            <div class="movie-title-row">
+                                <h3 class="movie-title" title="{{ movie.title }}">{{ movie.title }}</h3>
+                                <span class="movie-year">{{ movie.release_year or 'N/A' }}</span>
+                            </div>
+                            <div class="movie-rating">
+                                <i class="fa-solid fa-star"></i>
+                                <span>{{ "%.1f"|format(movie.vote_average) }}</span>
+                                <span class="vote-count">({{ "{:,}".format(movie.vote_count) }} votes)</span>
+                            </div>
+                            <div class="genre-tags">
+                                {% for g in movie.genres.split(',') %}
+                                <span class="genre-pill">{{ g.strip() }}</span>
+                                {% endfor %}
+                            </div>
+                            {% if movie.tagline %}
+                            <p class="movie-tagline">"{{ movie.tagline }}"</p>
+                            {% endif %}
+                            <p class="movie-overview">{{ movie.overview or 'No synopsis available for this film.' }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 CineAI Engine. Powered by TMDB Movie Datasets.</p>
+    </footer>
+
+</body>
+</html>
